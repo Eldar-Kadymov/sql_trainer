@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавление раздела</title>
+</head>
+<body>
+    <h1>Добавить раздел</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="category_name">Имя раздела:</label>
+        <input type="text" id="category_name" name="category_name" required>
+        <button type="submit">Добавить</button>
+    </form>
+</body>
+</html>

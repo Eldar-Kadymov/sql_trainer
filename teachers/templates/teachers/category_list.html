@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список заданий</title>
+</head>
+<body>
+    <h1>Добавить разделы</h1>
+    <a href="{% url 'teachers:category_add' %}">Добавить раздел</a>
+    
+    <h2>Список разделов:</h2>
+    <ul>
+        {% for category in categories %}
+        <li>{{ category.name }}</li>
+        <ul>
+            {% for task in category.task_set.all %}
+            <p><a href="{% url 'teachers:task_description' task.id %}">Задание #{{ task.id }}</a></p>
+            {% empty %}
+            <li>Заданий нет</li>
+            {% endfor %}
+        </ul>
+        <br>
+        <a href="{% url 'teachers:create_task' category.id %}">Добавить задание</a>
+        {% empty %}
+        <li>Разделов нет</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

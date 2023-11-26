@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Описание задания</title>
+</head>
+<body>
+    <h1>Описание задания</h1>
+    <p><strong>ID задания:</strong> {{ task.id }}</p>
+    <p><strong>Категория:</strong> {{ task.category.name }}</p>
+    <p><strong>Описание:</strong> {{ task.description }}</p>
+    <p><strong>SQL запрос:</strong> {{ task.sql_query }}</p>
+    <textarea cols="80" rows="20">{{ file_content }}</textarea>
+</body>
+</html>
