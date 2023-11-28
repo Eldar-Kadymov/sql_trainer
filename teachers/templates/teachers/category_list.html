@@ -1,4 +1,52 @@
+{% load static %}
+
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.31.2/css/ace.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'students/css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'teachers/css/add_task.css' %}">
+</head>
+<header style="left: 0; width: 100%;">
+    <span style="color: #57A3FF;">SQL <span style="color: #000;">Trainer</span><img src="{% static 'students/img/logo.png' %}" class="logo"></span>
+</header>
+<body>
+    <main style="width: 50vw; margin-top: 50px; left: 0;">
+        <p style="font-size: 2.1vh;">Управление заданиями</p>
+        {% for category in categories %}
+        <div style="padding: 5px 10px; background-color: #497FC1; color: #fff;" class="module">
+            <div style="font-size: 1.7vh;" class="module-name">{{ category.name }}</div>
+            <i style="font-size: 2vh;" class='bx bxs-chevron-down'></i>
+        </div>
+        <div class="task-list">
+            <a href="{% url 'teachers:create_task' category.id %}" class="add-task-btn">Добавить задание</a>
+            {% for task in category.task_set.all %}
+            <div class="task" style="background-color: #fff; border: 1px solid #C9C9C9; border-top: none;">
+                <a href="{% url 'teachers:task_description' task.id %}" style="text-decoration: none; width: 100%;">
+                    <div class="task-name">Задание №{{ task.id }}</div>
+                    <div style="font-size: 1.3vh; margin-top: 10px;" class="task-description">{{ task.description }}</div>
+                </a>
+                <!-- <i style="color: gray; cursor: pointer; font-size: 3vh;" class='bx bx-x'></i> -->
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <br>
+        <a href="{% url 'teachers:category_add' %}" class="add-module"><i class='bx bx-plus' ></i> Новый подраздел</a>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="{% static 'students/js/slide_sidebar.js' %}"></script>
+    <script src="{% static 'students/js/switch_tasks.js' %}"></script>
+</body>
+</html> 
+
+
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Список заданий</title>
@@ -25,4 +73,4 @@
         {% endfor %}
     </ul>
 </body>
-</html>
+</html> -->

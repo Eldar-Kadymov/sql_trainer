@@ -1,0 +1,144 @@
+main {
+    position: relative;
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    left: 10vw;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    background-color: #B9D9FF;
+    padding: 3px 10px;
+    border-radius: 7px;
+    width: fit-content;
+    font-size: 1.2vh;
+    color: #2E62A1;
+    transition: all 0.2s ease;
+    margin-top: 70px;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.breadcrumbs:hover {
+    background-color: #2E62A1;
+    color: #B9D9FF;
+}
+
+.add-task {
+    width: 60vw;
+    background-color: #FAFAFA;
+    border-radius: 10px;
+    border: 1px solid #DADADA;
+    padding: 30px 60px;
+}
+
+.task-name-input {
+    border: none;
+    outline: none;
+    background-color: inherit;
+    border-bottom: 2px solid lightgray;
+    width: 100%;
+    font-size: 2vh;
+    color: #497FC1;
+}
+
+.task-name-input::placeholder {
+    color: rgb(153, 153, 153);
+}
+
+.input-line {
+    position: relative;
+    width: 0;
+    background-color: #487FC1;
+    height: 2px;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.5s ease;
+}
+
+.task-name-input:focus + .input-line {
+    width: 100%;    
+}
+
+.description-input {
+    width: 100%;
+    border: 1px solid #CECECE;
+    resize: none;
+    border-radius: 8px;
+    outline: none;
+    overflow-y: hidden;
+}
+
+.create-task-btn {
+    display: block;
+    margin-left: auto;
+    background-color: #497FC1;
+    color: #fff;
+    border: none;
+    font-size: 1.4vh;
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+#editor {
+    position: relative;
+    width: 100%;
+    height: 20vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    border-radius: 0 0 5px 5px;
+    border: 2px solid lightgray;
+}
+
+.add-task-btn {
+    display: block;
+    font-size: 1.3vh;
+    border: 1px solid lightgray;
+    padding: 5px 10px;
+    text-decoration: none;
+    background-color: #D3E7FF; 
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.add-task-btn:hover {
+    background-color: #bedbff; 
+}
+
+.request-result-btn {
+    background-color: #fff;
+    border: 1px solid #2E62A1;
+    border-radius: 6px;
+    color: #2E62A1;
+    font-weight: 700;
+    font-size: 1.4vh;
+}
+
+.request-result {
+    background-color: #fff; 
+    border: 1px solid lightgray; 
+    border-radius: 8px; 
+    margin-top: 20px;
+    font-size: 1.5vh;
+    font-weight: 600;
+    padding: 5px;
+    resize: none;
+}
+
+.add-module {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin: auto; 
+    font-size: 1.5vh; 
+    border: none; 
+    background-color: #497FC1; 
+    padding: 5px 10px; 
+    color: #fff; 
+    border-radius: 8px; 
+    text-decoration: none;
+}

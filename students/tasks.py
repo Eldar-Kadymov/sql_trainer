@@ -42,7 +42,6 @@ def execute_sql_and_save_to_solution(solution_id):
     result = execute_sql_query(solution.query)
     csv_bytes = result.encode('utf-8')
     content_file = ContentFile(csv_bytes)
-
     task = solution.task
 
     moscow = pytz.timezone('Europe/Moscow')

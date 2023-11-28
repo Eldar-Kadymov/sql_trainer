@@ -1,4 +1,320 @@
+{% load static %}
+
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Trainer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/ace-builds@1.31.2/css/ace.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'students/css/index.css' %}">
+</head>
+<header>
+    <span style="color: #57A3FF;">SQL <span style="color: #000;">Trainer</span><img src="{% static 'students/img/logo.png' %}" class="logo"></span>
+    <div class="student-info">
+        <div class="d-flex flex-column">
+            <p style="font-size: 1.5vh; font-weight: 600;">Эльдар кадымов</p>
+            <span style="font-size: 1.3vh; font-weight: 500; color: #5E6E78;">mailmail@mail.ru</span>
+        </div>
+        <div>
+            <i style="font-size: 3vh; color: #999999; margin-left: 20px; cursor: pointer;" class='bx bx-dots-vertical-rounded'></i>
+        </div>
+    </div>
+</header>
+<div class="dropmenu">
+    <a href="#">изменить пароль</a>
+    <br>
+    <a href="#">логаут</a>
+</div>
+<body>
+    <aside>
+        <div class="task-option">
+            <span id="all">Все задания</span>
+            <!-- <span id="nedone">Невыполненные</span> -->
+        </div>
+        <!-- <div class="line"></div> -->
+        <div style="transition: all 0.5s ease;" id="tasks">
+            <div style="width: 20vw; margin-top: -5px; position: absolute;" >
+                {% for category, tasks_status in categories_list.items %}
+                    <div class="module">
+                        <div class="d-flex flex-row align-items-center">
+                            <i style="color: #8B8B8B; margin-right: 5px; font-size: 2vh;" class='bx bxs-chevron-down'></i>
+                            <div class="module-name">{{ category.name }}</div>
+                        </div>
+                            <div class="module-progress"></div>
+                    </div>
+                    <div class="task-list">
+                    {% for taskk, is_completed in tasks_status.items %}
+                        <a href="{% url 'students:category_task_detail' taskk.id %}" class="{% if task == taskk %} active-task {% endif %} task">
+                            <div>
+                                <div class="task-name d-flex flex-row align-items-center gap-2">
+                                {% if is_completed == True %}
+                                    <div style="background-color: #75C273;" class="task-indicator" id="task-status-{{ taskk.id }}"></div>
+                                {% elif is_completed == False %}
+                                    <div style="background-color: #C27373;" class="task-indicator" id="task-status-{{ taskk.id }}"></div>
+                                {% else %}
+                                    <div style="background-color: #B6B6B6;" class="task-indicator" id="task-status-{{ taskk.id }}"></div>
+                                {% endif %}
+                                Задание №{{ taskk.id }}</div>
+                                <div class="task-description">{{ taskk.description }}</div>
+                            </div>
+                            
+                        </a>
+                    {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- <div style="transform: translateX(100%);">
+                <div class="module">
+                    <div class="module-name">Пизда</div>
+                    <i class='bx bxs-chevron-down'></i>
+                </div>
+                <div class="task-list">
+                    <div class="task">
+                        <div style="width: 90%;">
+                            <div class="task-name">Задание №1</div>
+                            <div class="task-description">Вывести имена всех людей, которые есть в базе данных авиакомпаний</div>
+                        </div>
+                        <div class="task-indicator"></div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </aside>
+    <section class="code">
+        <div style="border-radius: 5px 5px 0 0; border-bottom: 1px solid #D8D8D8; padding: 4px 20px; font-size: 1.5vh; background-color: #F1F1F1;">Редактор кода</div>
+        <div id="editor"></div>
+        <form id="solution-form" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="task-id" name="task_id" value="{{ task.id }}">
+            <textarea id="query" name="query" style="display: none;" ></textarea>
+            <input id="submit-btn" type="submit" value="Отправить" class="submit-btn">
+        </form>
+    </section>
+    <section class="history">
+        <div style="border-bottom: 1px solid #D8D8D8; padding: 4px 20px; font-size: 1.5vh; background-color: #F1F1F1;">История решений</div>
+        <div style="width: 95%; margin: 0 auto; margin-top: 15px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Время отправки</th>
+                        <th>ID</th>
+                        <th>Время выполнения</th>
+                        <th>Результат</th>
+                    </tr>
+                </thead>
+                <tbody id="solution-list">
+                    {% for solution in solutions %}
+                    <tr>
+                        <td>{{ solution.submission_date|date:"d M Y, H:i:s" }}</td>
+                        <td>{{ solution.id }}</td>
+                        <td id="solution-{{ solution.id }}-time">{{ solution.formatted_execution_time}}</td>
+                        {% if solution.is_correct == None %}
+                            <td id="solution-{{ solution.id }}">Запрос выполняется</td>
+                        {% elif solution.is_correct %}
+                            <td style="color: #00B833;" id="solution-{{ solution.id }}">Верно</td>
+                        {% else %}
+                            <td style="color: #FF0000;" id="solution-{{ solution.id }}">Неверно</td>
+                        {% endif %}
+                        <td><a href="#" style="text-decoration: none;">Посмотреть отчет</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section class="structure">
+        <div style="border-radius: 5px 5px 0 0; border-bottom: 1px solid #D8D8D8; padding: 4px 20px; font-size: 1.5vh; background-color: #F1F1F1;">Структура</div>
+        <div id="container"></div>
+    </section>
+<script src="https://cdn.jsdelivr.net/npm/ace-builds@1.31.2/src-min-noconflict/ace.min.js"></script>
+<script src="{% static 'students/js/ext-language_tools.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="{% static 'students/js/slide_sidebar.js' %}"></script>
+<script src="{% static 'students/js/switch_tasks.js' %}"></script>
+<script src="{% static 'students/js/dropdown_menu.js' %}"></script>
+<script src="{% static 'students/js/circle-progress.js' %}"></script>
+<script src="https://unpkg.com/konva@9.2.3/konva.min.js"></script>
+<script>
+    var width = $("#container").innerWidth();
+    var height = $("#container").innerHeight();
+    var stage = new Konva.Stage({
+        container: 'container',
+        width: width,
+        height: height,
+        draggable: true,
+      });
+      var layer = new Konva.Layer();
+      stage.add(layer);
+
+      var goodsImg = new Image();
+      goodsImg.onload = function () {
+        var goods = new Konva.Image({
+          x: 50,
+          y: 50,
+          image: goodsImg,
+          width: 559,
+          height: 537,
+        });
+
+        // add the shape to the layer
+        layer.add(goods);
+      };
+      goodsImg.src = "{% static 'students/img/db.png' %}";
+</script>
+<script>
+$('.module-progress').circleProgress({
+    value: 0.5,
+    size: 20,
+    thickness: 5,
+    startAngle: -1.5708,
+    fill: {
+    color: '#68C566'
+    },
+});
+</script>
+<script>
+    var editor = ace.edit("editor");
+    var textarea = $('textarea[name="query"]');
+    ace.require("ace/ext/language_tools");
+    editor.setTheme("ace/theme/sqlserver");
+    editor.session.setMode("ace/mode/sql");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        showPrintMargin: false,
+    });
+    editor.getSession().on("change", function () {
+    textarea.val(editor.getSession().getValue());
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        var taskId = $('#task-id').val();
+    
+        var savedQuery = localStorage.getItem('savedQuery_' + taskId);
+        if (savedQuery) {
+            editor.setValue(savedQuery);
+            editor.clearSelection();
+        }
+    
+        $('.ace_text-input').on('keydown', function() {
+            var queryContent = editor.getValue();
+            localStorage.setItem('savedQuery_' + taskId, queryContent);
+        });
+    
+        var isButtonDisabled = localStorage.getItem('isButtonDisabled');
+    
+        if (isButtonDisabled === 'true') {
+            $('#submit-btn').prop('disabled', true);
+            var solutionId = localStorage.getItem('lastSolutionId');
+            if (solutionId) {
+                var intervalId = setInterval(function() {
+                    checkSolutionStatus(taskId, solutionId, intervalId);
+                }, 1000);
+            }
+        }
+    
+        $('#solution-form').submit(function(e) {
+            e.preventDefault();
+    
+            var taskId = $('#task-id').val();
+            var query = $('#query').val();
+    
+            $('#submit-btn').prop('disabled', true);
+            localStorage.setItem('isButtonDisabled', 'true');
+    
+            $.ajax({
+                url: '/students/submit_solution/',
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    task_id: taskId,
+                    query: query
+                },
+                success: function(response) {
+                    console.log('Решение отправлено успешно');
+                    var solutionId = response.solution_id;
+    
+                    var newSolution = `
+                        <tr>
+                            <td>${response.submission_date}</td>
+                            <td>${solutionId}</td>
+                            <td id="solution-${solutionId}-time">-</td>
+                            <td id="solution-${solutionId}">Запрос выполняется</td>
+                            <td><a href="#" style="text-decoration: none;">Посмотреть отчет</a></td>
+                        </tr>`;
+                    $('#solution-list').prepend(newSolution);
+                    $('#solution-list #empty-list').remove();
+    
+                    localStorage.setItem('lastSolutionId', solutionId);
+                    var intervalId = setInterval(function() {
+                        checkSolutionStatus(taskId, solutionId, intervalId);
+                    }, 1000);
+    
+                },
+                error: function(error) {
+                    console.log('Ошибка отправки решения');
+                    $('#submit-btn').prop('disabled', false);
+                }
+            });
+        });
+    
+        function checkSolutionStatus(taskId, solutionId, intervalId) {
+            $.ajax({
+                url: `/students/get_solution_status/${solutionId}/`,
+                type: 'GET',
+                success: function(response) {
+                    var status = response.status;
+                    var task_status = response.task_status;
+    
+                    if (task_status === true) {
+                        task_status = "#75C273";
+                    } else if (task_status === false) {
+                        task_status = "#C27373";
+                    } else {
+                        task_status = "#B6B6B6";
+                    }
+
+                    if (status === 'Верно') {
+                        $(`#solution-${solutionId}`).css("color", "#00B833");
+                    }
+                    else if (status === 'Неверно') {
+                        $(`#solution-${solutionId}`).css("color", "#FF0000");
+                    }
+    
+                    $(`#solution-${solutionId}`).text(`${status}`);
+                    $(`#task-status-${taskId}`).css("background-color", `${task_status}`)
+    
+                    $(`#solution-${solutionId}-time`).text(`${response.execution_time}`)
+    
+                    if (status === 'Верно' || status === 'Неверно') {
+                        clearInterval(intervalId);
+                        $('#submit-btn').prop('disabled', false);
+                        localStorage.removeItem('isButtonDisabled');
+                        localStorage.removeItem('lastSolutionId');
+                        localStorage.removeItem('solutionId');
+                    }
+                },
+                error: function(error) {
+                    console.log('Ошибка получения статуса решения');
+                    clearInterval(intervalId);
+                    $('#submit-btn').prop('disabled', false);
+                }
+            });
+        }
+    
+    });
+    
+    </script>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Список заданий</title>
@@ -18,7 +334,6 @@
                             <a href="{% url 'students:category_task_detail' task.id %}">Задание #{{ task.id }}</a>
                             <p>{{ task.description }}</p>
                             <p>Статус:</p>
-                            <p id="task-status-{{ task.id }}"><p>
                                 {% if is_completed == True %}
                                     <p id="task-status-{{ task.id }}">Верно</p>
                                 {% elif is_completed == False %}
@@ -72,117 +387,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    var taskId = $('#task-id').val();
 
-    var savedQuery = localStorage.getItem('savedQuery_' + taskId);
-    if (savedQuery) {
-        $('#query').val(savedQuery);
-    }
-
-    $('#query').on('input', function() {
-        var queryContent = $(this).val();
-        localStorage.setItem('savedQuery_' + taskId, queryContent);
-    });
-
-    var isButtonDisabled = localStorage.getItem('isButtonDisabled');
-
-    if (isButtonDisabled === 'true') {
-        $('#submit-btn').prop('disabled', true);
-        var solutionId = localStorage.getItem('lastSolutionId');
-        if (solutionId) {
-            var intervalId = setInterval(function() {
-                checkSolutionStatus(taskId, solutionId, intervalId);
-            }, 1000);
-        }
-    }
-
-    $('#solution-form').submit(function(e) {
-        e.preventDefault();
-
-        var taskId = $('#task-id').val();
-        var query = $('#query').val();
-
-        $('#submit-btn').prop('disabled', true);
-        localStorage.setItem('isButtonDisabled', 'true');
-
-        $.ajax({
-            url: '/students/submit_solution/',
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                task_id: taskId,
-                query: query
-            },
-            success: function(response) {
-                console.log('Решение отправлено успешно');
-                var solutionId = response.solution_id;
-
-                var newSolution = `
-                    <li>
-                        <p>Время отправки: ${response.submission_date}</p>
-                        <p>Результат:</p>
-                        <p id="solution-${solutionId}">Запрос выполняется</p>
-                        <p>ID: ${solutionId}</p>
-                        <p>Время выполнения запроса:<p>
-                        <p id="solution-${solutionId}-time">-</p>
-                    </li>`;
-                $('#solution-list').prepend(newSolution);
-                $('#solution-list #empty-list').remove();
-
-                localStorage.setItem('lastSolutionId', solutionId);
-                var intervalId = setInterval(function() {
-                    checkSolutionStatus(taskId, solutionId, intervalId);
-                }, 1000);
-
-            },
-            error: function(error) {
-                console.log('Ошибка отправки решения');
-                $('#submit-btn').prop('disabled', false);
-            }
-        });
-    });
-
-    function checkSolutionStatus(taskId, solutionId, intervalId) {
-        $.ajax({
-            url: `/students/get_solution_status/${solutionId}/`,
-            type: 'GET',
-            success: function(response) {
-                var status = response.status;
-                var task_status = response.task_status;
-
-                if (task_status === true) {
-                    task_status = 'Верно';
-                } else if (task_status === false) {
-                    task_status = 'Неверно';
-                } else {
-                    task_status = 'Не приступил';
-                }
-
-                $(`#solution-${solutionId}`).text(`${status}`);
-                $(`#task-status-${taskId}`).text(`${task_status}`)
-
-                $(`#solution-${solutionId}-time`).text(`${response.execution_time}`)
-
-                if (status === 'Верно' || status === 'Неверно') {
-                    clearInterval(intervalId);
-                    $('#submit-btn').prop('disabled', false);
-                    localStorage.removeItem('isButtonDisabled');
-                    localStorage.removeItem('lastSolutionId');
-                    localStorage.removeItem('solutionId');
-                }
-            },
-            error: function(error) {
-                console.log('Ошибка получения статуса решения');
-                clearInterval(intervalId);
-                $('#submit-btn').prop('disabled', false);
-            }
-        });
-    }
-
-});
-
-</script>
 </body>
-</html>
+</html> -->

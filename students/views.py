@@ -34,8 +34,6 @@ def category_task_detail(request, task_id=1):
 
         categories_list[category] = tasks_status
 
-    print(categories_list)
-
 
     context = {
         'categories': categories,
